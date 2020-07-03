@@ -9,17 +9,28 @@
 FROM   ubuntu:18.04
 
 # Make sure we don't get notifications we can't answer during building.
-ENV    DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND noninteractive
+
+ENV DISCORD_TOKEN ''
+ENV MINECRAFT_CHANNEL ''
+ENV CLIENT_ID ''
 
 # Download and install everything from the repos.
-RUN    apt-get -y update; apt-get -y upgrade; apt-get -y install software-properties-common curl default-jdk
-RUN    apt-add-repository -y ppa:webupd8team/java; apt-get -y update
-RUN    echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections  && \
-       echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections  && \
-       apt-get --yes install curl oracle-java8-installer ; apt-get clean
+RUN apt-get -y update && \
+    apt-get -y upgrade; apt-get -y install software-properties-common curl ruby-full build-essential wget unzip openjdk-8-jre && \
+    gem install bundler && \
+    apt-get clean
+
+# Install deps
+ADD    ./scripts/Gemfile /Gemfile
+ADD    ./scripts/Gemfile.lock /Gemfile.lock
+
+RUN    gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)" && bundle install -j4
 
 # Load in all of our config files.
 ADD    ./scripts/start /start
+ADD    ./scripts/main.rb /main.rb
+ADD    ./scripts/emodata.json /emodata.json
 
 # Fix all permissions
 RUN    chmod +x /start
@@ -27,8 +38,13 @@ RUN    chmod +x /start
 # 25565 is for minecraft
 EXPOSE 25565
 
+# 25001 for kontrol panel
+EXPOSE 25001
+
 # /data contains static files and database
-VOLUME ["/data"]
+VOLUME ["/data/world"]
+
+ADD    ./scripts/server.properties /data/server.properties
 
 # /start runs it.
-CMD    ["/start"]
+CMD    ["bundle", "exec", "ruby", "main.rb"]
