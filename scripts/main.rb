@@ -133,7 +133,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
         puts 'Could not send'
         p e
       end
-      Myapp.quit!
+      MyApp.quit!
     end
   end
 
