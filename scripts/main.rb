@@ -29,99 +29,111 @@ end
 
 def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
   Thread.new do
-    players = {}
+    begin
+      players = {}
 
-    # Do stuff with the output here. Just printing to show it works
-    stdout.each do |line|
-      begin
-        # remove colors
-        line.gsub!(/\r?\e\[(K|\d+(;\d+)*m)/, '')
+      # Do stuff with the output here. Just printing to show it works
+      stdout.each do |line|
+        begin
+          # remove colors
+          line.gsub!(/\r?\e\[(K|\d+(;\d+)*m)/, '')
 
-        infomatch = %r{^\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\]: (?<message>.+)}.match(line)
+          infomatch = %r{^\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\]: (?<message>.+)}.match(line)
 
-        p line
-
-        if infomatch
-
-          logchan.send_message("[INFO] #{infomatch[:message]}")
-
-          joinmatch = /^(?<name>[^\<\>]+?) joined the game/.match(infomatch[:message])
-          leftmatch = /^(?<name>[^\<\>]+?) left the game/.match(infomatch[:message])
-
-          if joinmatch
-            players[joinmatch[:name]] = true if joinmatch[:name]
-          end
-
-          can_display = false
-
-          players.keys.each do |name|
-            can_display = true if infomatch[:message].include?(name) && (players[name] == true)
-          end
-
-          if leftmatch
-            players[leftmatch[:name]] = false if leftmatch[:name]
-            can_display = true
-          end
-
-          can_display = false if infomatch[:message].start_with? '[Server]'
-          can_display = false if infomatch[:message].start_with? '['
-
-          msg_to_discord = infomatch[:message]
-
-          user_list = chan.users
-
-          msg_to_discord = msg_to_discord.gsub(/@[^ ]+/) do |mention|
-            mention = mention[1..-1].strip
-
-            matches = user_list.select { |user| user.username == mention || user.nick == mention }.map(&:id)
-
-            if !matches.empty?
-              matches.map { |x| "<@#{x}>" }.join(' ')
-            else
-              "@#{mention}"
-            end
-          end
-
-          msg_to_discord.gsub!('lost connection', '接続が切断されました')
-          msg_to_discord.gsub!('Disconnected', '断線')
-          msg_to_discord.gsub!('left the game', 'はゲームから退出しました')
-          msg_to_discord.gsub!('joined the game', 'はゲームに入りました')
-
-          msg_to_discord.gsub!(/^(.*?) (was shot by )(.+?)\r?$/, '\1は\3に打たされた')
-          msg_to_discord.gsub!(/^(.*?) (was slain by )(.+?)\r?$/, '\1は\3に殺された')
-          msg_to_discord.gsub!(/^(.*?) (was blown up by )(.+?)\r?$/, '\1は\3の爆発に死んだ')
-          msg_to_discord.gsub!(/^(.*?) (was killed by )(.+?)\r?$/, '\1は\3に殺された')
-          msg_to_discord.gsub!(/^(.*?) (got revenge on )(.+?)\r?$/, '\1は\3に復讐された')
-          msg_to_discord.gsub!(/^(.*?) (has made the achievement )(.+?)\r?$/, '\1は\3のアチーブメントゲット')
-
-          msg_to_discord.gsub!('fell from a high place', 'は高い場所から飛び降りた')
-          msg_to_discord.gsub!('burned to death', 'は火に燃やされた')
-
-          msg_to_discord.gsub!('fell off a ladder', 'はしごから転落した')
-          msg_to_discord.gsub!('fell off some vines', 'はツタから転落した')
-          msg_to_discord.gsub!('fell out of the water', 'は水から転落した')
-          msg_to_discord.gsub!('fell into a patch of fire', 'は火に燃やされた')
-          msg_to_discord.gsub!('fell into a patch of cacti', 'はサボテンにやられた')
-
-          msg_to_discord.gsub!('tried to swim in lava', 'は')
-          msg_to_discord.gsub!('blew up', 'が爆発された')
-          msg_to_discord.gsub!('drowned', 'が溺れた')
-          msg_to_discord.gsub!('withered away', 'は干からびた')
-
-          chan.send_message msg_to_discord if can_display
-        end
-
-        # [12:24:39] [Server thread/INFO]: azunyansan joined the game
-
-        if %r{^\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\]: Done}.match(line)
           p line
-          chan.send_message 'サーバー起動完了'
-          logchan.send_message '[SERV] Start complete'
+
+          if infomatch
+
+            logchan.send_message("[INFO] #{infomatch[:message]}")
+
+            joinmatch = /^(?<name>[^\<\>]+?) joined the game/.match(infomatch[:message])
+            leftmatch = /^(?<name>[^\<\>]+?) left the game/.match(infomatch[:message])
+
+            if joinmatch
+              players[joinmatch[:name]] = true if joinmatch[:name]
+            end
+
+            can_display = false
+
+            players.keys.each do |name|
+              can_display = true if infomatch[:message].include?(name) && (players[name] == true)
+            end
+
+            if leftmatch
+              players[leftmatch[:name]] = false if leftmatch[:name]
+              can_display = true
+            end
+
+            can_display = false if infomatch[:message].start_with? '[Server]'
+            can_display = false if infomatch[:message].start_with? '['
+
+            msg_to_discord = infomatch[:message]
+
+            user_list = chan.users
+
+            msg_to_discord = msg_to_discord.gsub(/@[^ ]+/) do |mention|
+              mention = mention[1..-1].strip
+
+              matches = user_list.select { |user| user.username == mention || user.nick == mention }.map(&:id)
+
+              if !matches.empty?
+                matches.map { |x| "<@#{x}>" }.join(' ')
+              else
+                "@#{mention}"
+              end
+            end
+
+            msg_to_discord.gsub!('lost connection', '接続が切断されました')
+            msg_to_discord.gsub!('Disconnected', '断線')
+            msg_to_discord.gsub!('left the game', 'はゲームから退出しました')
+            msg_to_discord.gsub!('joined the game', 'はゲームに入りました')
+
+            msg_to_discord.gsub!(/^(.*?) (was shot by )(.+?)\r?$/, '\1は\3に打たされた')
+            msg_to_discord.gsub!(/^(.*?) (was slain by )(.+?)\r?$/, '\1は\3に殺された')
+            msg_to_discord.gsub!(/^(.*?) (was blown up by )(.+?)\r?$/, '\1は\3の爆発に死んだ')
+            msg_to_discord.gsub!(/^(.*?) (was killed by )(.+?)\r?$/, '\1は\3に殺された')
+            msg_to_discord.gsub!(/^(.*?) (got revenge on )(.+?)\r?$/, '\1は\3に復讐された')
+            msg_to_discord.gsub!(/^(.*?) (has made the achievement )(.+?)\r?$/, '\1は\3のアチーブメントゲット')
+
+            msg_to_discord.gsub!('fell from a high place', 'は高い場所から飛び降りた')
+            msg_to_discord.gsub!('burned to death', 'は火に燃やされた')
+
+            msg_to_discord.gsub!('fell off a ladder', 'はしごから転落した')
+            msg_to_discord.gsub!('fell off some vines', 'はツタから転落した')
+            msg_to_discord.gsub!('fell out of the water', 'は水から転落した')
+            msg_to_discord.gsub!('fell into a patch of fire', 'は火に燃やされた')
+            msg_to_discord.gsub!('fell into a patch of cacti', 'はサボテンにやられた')
+
+            msg_to_discord.gsub!('tried to swim in lava', 'は')
+            msg_to_discord.gsub!('blew up', 'が爆発された')
+            msg_to_discord.gsub!('drowned', 'が溺れた')
+            msg_to_discord.gsub!('withered away', 'は干からびた')
+
+            chan.send_message msg_to_discord if can_display
+          end
+
+          if %r{^\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\]: Done}.match(line)
+            p line
+            chan.send_message 'サーバー起動完了'
+            logchan.send_message '[SERV] Start complete'
+          end
+        rescue StandardError => e
+          puts 'Error sending message:'
+          p e
         end
+      end
+    rescue StandardError => e
+      puts '********************Error******************'
+      p e
+      begin
+        logchan.send_message "[ERRO] #{e.message}"
+        logchan.send_message "[ERRO] #{e.backtrace}"
+        chan.send_message 'サーバーエラーが発生しました'
       rescue StandardError => e
-        puts 'Error sending message:'
+        puts 'Could not send'
         p e
       end
+      Myapp.quit!
     end
   end
 
@@ -198,13 +210,7 @@ def start_server
         end
       end
 
-      begin
-        start_minecraft(bot, chan, logchan, stdin, stdout, pid)
-      rescue Errno::EIO
-        puts 'Errno:EIO error, but this probably just means ' \
-             'that the process has finished giving output'
-        chan.send_message 'Minecraft server is shutting down.'
-      end
+      start_minecraft(bot, chan, logchan, stdin, stdout, pid)
     end
   rescue PTY::ChildExited
     puts 'The child process exited!'
