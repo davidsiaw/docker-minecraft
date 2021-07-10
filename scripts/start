@@ -5,7 +5,7 @@
 
 if [ ! -f /data/minecraft_server.jar ]
 then
-    curl "https://launcher.mojang.com/v1/objects/f02f4473dbf152c23d7d484952121db0b36698cb/server.jar" -o /data/minecraft_server.jar
+    curl "https://launcher.mojang.com/v1/objects/a16d67e5807f57fc4e550299cf20226194497dc2/server.jar" -o /data/minecraft_server.jar
 fi
 
 if [ ! -f /data/eula.txt ]
@@ -13,4 +13,4 @@ then
     echo "eula=true" > /data/eula.txt
 fi
 
-cd /data/; java -Xmx2G -jar minecraft_server.jar nogui
+cd /data/; java -server -Xms512M -Xmx2048M -jar minecraft_server.jar nogui
