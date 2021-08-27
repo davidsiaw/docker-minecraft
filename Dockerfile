@@ -45,6 +45,7 @@ EXPOSE 25001
 VOLUME ["/data/world"]
 
 ADD    ./scripts/server.properties /data/server.properties
+ADD    ./scripts/server-icon.png /data/server-icon.png
 
 # /start runs it.
 CMD    ["bundle", "exec", "ruby", "main.rb"]
