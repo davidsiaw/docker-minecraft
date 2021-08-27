@@ -6,7 +6,7 @@
 # -----------------------------------------------------------------------------
 
 # Base image is the latest LTS version of Ubuntu
-FROM   ubuntu:18.04
+FROM   ubuntu:20.04
 
 # Make sure we don't get notifications we can't answer during building.
 ENV DEBIAN_FRONTEND noninteractive
@@ -17,7 +17,7 @@ ENV CLIENT_ID ''
 
 # Download and install everything from the repos.
 RUN apt-get -y update && \
-    apt-get -y upgrade; apt-get -y install software-properties-common curl ruby-full build-essential wget unzip openjdk-8-jre && \
+    apt-get -y upgrade; apt-get -y install software-properties-common curl ruby-full build-essential wget unzip openjdk-16-jre-headless && \
     gem install bundler && \
     apt-get clean
 
