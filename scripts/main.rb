@@ -83,41 +83,41 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
               end
             end
 
-            unless msg_to_discord.start_with?('<')
-              msg_to_discord.gsub!('lost connection', '接続が切断されました')
-              msg_to_discord.gsub!('Disconnected', '断線')
-              msg_to_discord.gsub!('left the game', 'はゲームから退出しました')
-              msg_to_discord.gsub!('joined the game', 'はゲームに入りました')
+            # unless msg_to_discord.start_with?('<')
+            #   msg_to_discord.gsub!('lost connection', '接続が切断されました')
+            #   msg_to_discord.gsub!('Disconnected', '断線')
+            #   msg_to_discord.gsub!('left the game', 'はゲームから退出しました')
+            #   msg_to_discord.gsub!('joined the game', 'はゲームに入りました')
 
-              msg_to_discord.gsub!(/^(.*?) (was shot by )(.+?)\r?$/, '\1は\3に打たされた')
-              msg_to_discord.gsub!(/^(.*?) (was slain by )(.+?)\r?$/, '\1は\3に殺された')
-              msg_to_discord.gsub!(/^(.*?) (was impaled by )(.+?)\r?$/, '\1は\3に刺された')
-              msg_to_discord.gsub!(/^(.*?) (was blown up by )(.+?)\r?$/, '\1は\3の爆発に死んだ')
-              msg_to_discord.gsub!(/^(.*?) (was killed by )(.+?)\r?$/, '\1は\3に殺された')
-              msg_to_discord.gsub!(/^(.*?) (got revenge on )(.+?)\r?$/, '\1は\3に復讐された')
-              msg_to_discord.gsub!(/^(.*?) (has made the achievement )(.+?)\r?$/, '\1は\3のアチーブメントゲット')
+            #   msg_to_discord.gsub!(/^(.*?) (was shot by )(.+?)\r?$/, '\1は\3に打たされた')
+            #   msg_to_discord.gsub!(/^(.*?) (was slain by )(.+?)\r?$/, '\1は\3に殺された')
+            #   msg_to_discord.gsub!(/^(.*?) (was impaled by )(.+?)\r?$/, '\1は\3に刺された')
+            #   msg_to_discord.gsub!(/^(.*?) (was blown up by )(.+?)\r?$/, '\1は\3の爆発に死んだ')
+            #   msg_to_discord.gsub!(/^(.*?) (was killed by )(.+?)\r?$/, '\1は\3に殺された')
+            #   msg_to_discord.gsub!(/^(.*?) (got revenge on )(.+?)\r?$/, '\1は\3に復讐された')
+            #   msg_to_discord.gsub!(/^(.*?) (has made the achievement )(.+?)\r?$/, '\1は\3のアチーブメントゲット')
 
-              msg_to_discord.gsub!('fell from a high place', 'は高い場所から飛び降りた')
-              msg_to_discord.gsub!('burned to death', 'は火に燃やされた')
+            #   msg_to_discord.gsub!('fell from a high place', 'は高い場所から飛び降りた')
+            #   msg_to_discord.gsub!('burned to death', 'は火に燃やされた')
 
-              msg_to_discord.gsub!('fell off a ladder', 'はしごから転落した')
-              msg_to_discord.gsub!('fell off some vines', 'はツタから転落した')
-              msg_to_discord.gsub!('fell out of the water', 'は水から転落した')
-              msg_to_discord.gsub!('fell into a patch of fire', 'は火に燃やされた')
-              msg_to_discord.gsub!('fell into a patch of cacti', 'はサボテンにやられた')
+            #   msg_to_discord.gsub!('fell off a ladder', 'はしごから転落した')
+            #   msg_to_discord.gsub!('fell off some vines', 'はツタから転落した')
+            #   msg_to_discord.gsub!('fell out of the water', 'は水から転落した')
+            #   msg_to_discord.gsub!('fell into a patch of fire', 'は火に燃やされた')
+            #   msg_to_discord.gsub!('fell into a patch of cacti', 'はサボテンにやられた')
 
-              msg_to_discord.gsub!('tried to swim in lava', 'は')
-              msg_to_discord.gsub!('blew up', 'が爆発された')
-              msg_to_discord.gsub!('drowned', 'が溺れた')
-              msg_to_discord.gsub!('withered away', 'は干からびた')
-            end
+            #   msg_to_discord.gsub!('tried to swim in lava', 'は')
+            #   msg_to_discord.gsub!('blew up', 'が爆発された')
+            #   msg_to_discord.gsub!('drowned', 'が溺れた')
+            #   msg_to_discord.gsub!('withered away', 'は干からびた')
+            # end
 
             chan.send_message msg_to_discord if can_display
           end
 
           if %r{^\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\]: Done}.match(line)
             p line
-            chan.send_message 'サーバー起動完了'
+            chan.send_message 'Server up.'
             logchan.send_message '[SERV] Start complete'
           end
         rescue StandardError => e
@@ -131,7 +131,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
       begin
         logchan.send_message "[ERRO] #{e.message}"
         logchan.send_message "[ERRO] #{e.backtrace}"
-        chan.send_message 'サーバーエラーが発生しました'
+        chan.send_message 'Server errored'
       rescue StandardError => e
         puts 'Could not send'
         p e
@@ -146,7 +146,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
   MyApp.run!
 
   puts 'Server shutting down'
-  chan.send_message 'サーバーは停止しました'
+  chan.send_message 'Server shutting down...'
 
   # stdout.each do |line|
   #  puts "[STOPPING] #{line}"
@@ -179,7 +179,7 @@ def start_server
     begin
       logchan = bot.find_channel('mcbotlog')[0]
       chan = bot.find_channel(channel_name.to_s)[0]
-      chan.send_message('サーバー起動中...')
+      chan.send_message('Server starting...')
       logchan.send_message('[SERV] Start')
       break
     rescue StandardError => e
@@ -217,7 +217,7 @@ def start_server
     end
   rescue PTY::ChildExited
     puts 'The child process exited!'
-    chan.send_message 'サーバーは停止しました'
+    chan.send_message 'Server has shut down'
   end
 end
 

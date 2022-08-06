@@ -17,7 +17,7 @@ ENV CLIENT_ID ''
 
 # Download and install everything from the repos.
 RUN apt-get -y update && \
-    apt-get -y upgrade; apt-get -y install software-properties-common curl ruby-full build-essential wget unzip openjdk-16-jre-headless && \
+    apt-get -y upgrade; apt-get -y install software-properties-common curl ruby-full build-essential wget unzip openjdk-17-jre-headless && \
     gem install bundler && \
     apt-get clean
 
