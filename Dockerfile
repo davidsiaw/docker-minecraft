@@ -6,7 +6,7 @@
 # -----------------------------------------------------------------------------
 
 # Base image is the latest LTS version of Ubuntu
-FROM   ubuntu:20.04
+FROM   ubuntu:22.04
 
 # Make sure we don't get notifications we can't answer during building.
 ENV DEBIAN_FRONTEND noninteractive
@@ -17,7 +17,7 @@ ENV CLIENT_ID ''
 
 # Download and install everything from the repos.
 RUN apt-get -y update && \
-    apt-get -y upgrade; apt-get -y install software-properties-common curl ruby-full build-essential wget unzip openjdk-17-jre-headless && \
+    apt-get -y upgrade; apt-get -y install software-properties-common curl ruby-full build-essential wget unzip openjdk-8-jre-headless && \
     gem install bundler && \
     apt-get clean
 
@@ -42,9 +42,13 @@ EXPOSE 25565
 EXPOSE 25001
 
 # /data contains static files and database
-VOLUME ["/data/world"]
+VOLUME ["/data"]
 
 ADD    ./scripts/server.properties /data/server.properties
+
+ENV MOTD "Ruby's OceanBlock Server"
+ENV LEVEL default
+ENV JVM_OPTS "-Xms4096m -Xmx6144m"
 
 # /start runs it.
 CMD    ["bundle", "exec", "ruby", "main.rb"]
