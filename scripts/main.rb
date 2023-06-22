@@ -158,7 +158,11 @@ end
 def start_server
   cmd = '/start'
 
-  bot = Discordrb::Bot.new token: ENV['DISCORD_TOKEN'], client_id: ENV['CLIENT_ID']
+  bot = Discordrb::Bot.new(
+    token: ENV['DISCORD_TOKEN'],
+    client_id: ENV['CLIENT_ID'],
+    intents: [Discordrb::ALL_INTENTS & ~(Discordrb::INTENTS[:server_members] | Discordrb::INTENTS[:server_presences])],
+  )
 
   channel_name = ENV['MINECRAFT_CHANNEL'] || 'bot-test'
 
@@ -178,18 +182,26 @@ def start_server
 
     begin
       logchan = bot.find_channel('mcbotlog')[0]
+      if logchan.nil?
+        puts "#mcbotlog not found!"
+      end
       chan = bot.find_channel(channel_name.to_s)[0]
+      if chan.nil?
+        puts "#{channel_name} not found!"
+      end
       chan.send_message('Server starting...')
       logchan.send_message('[SERV] Start')
       break
     rescue StandardError => e
-      puts "Can't find channels. retrying..."
+      puts "Can't find channels #{e.message}. retrying..."
+      sleep(10)
     end
   end
 
   begin
     PTY.spawn(cmd) do |stdout, stdin, pid|
       bot.message(in: ["##{channel_name}"]) do |event|
+        p event.message
         message = event.message.content
 
         if message.start_with?('!') && event.author.id.to_s == ENV['ADMIN_ID'].to_s
