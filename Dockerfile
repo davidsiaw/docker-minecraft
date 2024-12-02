@@ -9,11 +9,11 @@
 FROM   ubuntu:22.04
 
 # Make sure we don't get notifications we can't answer during building.
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
-ENV DISCORD_TOKEN ''
-ENV MINECRAFT_CHANNEL ''
-ENV CLIENT_ID ''
+ENV DISCORD_TOKEN=''
+ENV MINECRAFT_CHANNEL=''
+ENV CLIENT_ID=''
 
 # Download and install everything from the repos.
 RUN apt-get -y update && \
@@ -45,6 +45,10 @@ EXPOSE 25001
 VOLUME ["/data/world"]
 
 ADD    ./scripts/server.properties /data/server.properties
+
+ENV MOTD="Ruby's Direwolf Minecraft Server"
+ENV LEVEL=default
+ENV JVM_OPTS="-Xms4096m -Xmx6144m"
 
 # /start runs it.
 CMD    ["bundle", "exec", "ruby", "main.rb"]

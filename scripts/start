@@ -3,14 +3,27 @@
 # docker-minecraft /start script
 # -----------------------------------------------------------------------------
 
-if [ ! -f /data/minecraft_server.jar ]
-then
-    curl "https://piston-data.mojang.com/v1/objects/84194a2f286ef7c14ed7ce0090dba59902951553/server.jar" -o /data/minecraft_server.jar
+cd /data/;
+if ! [[ -f serverinstall_95_6434 ]]; then
+    rm -f serverinstall_* forge-*.jar
+    curl -o 'serverinstall_95_6434' 'https://api.feed-the-beast.com/v1/modpacks/public/server/installer?platform=ftb&packId=95&versionId=6434&os=linux'
+    chmod +x serverinstall_95_6434
+    ./serverinstall_95_6434 --dir /data --auto --force
 fi
+if [[ -n "$MOTD" ]]; then
+    sed -i "/motd\s*=/ c motd=$MOTD" /data/server.properties
+fi
+if [[ -n "$LEVEL" ]]; then
+    sed -i "/level-name\s*=/ c level-name=$LEVEL" /data/server.properties
+fi
+if [[ -n "$OPS" ]]; then
+    echo $OPS | awk -v RS=, '{print}' >> ops.txt
+fi
+
 
 if [ ! -f /data/eula.txt ]
 then
     echo "eula=true" > /data/eula.txt
 fi
 
-cd /data/; java -server -Xms512M -Xmx2048M -jar minecraft_server.jar nogui
+sh run.sh
