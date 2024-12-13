@@ -38,7 +38,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
           # remove colors
           line.gsub!(/\r?\e\[(K|\d+(;\d+)*m)/, '')
 
-          infomatch = %r{^\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\]: (?<message>.+)}.match(line)
+          infomatch = %r{\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\] \[[^\]]+\]: (?<message>.+)}.match(line)
 
           p line
 
@@ -46,8 +46,8 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
 
             logchan.send_message("[INFO] #{infomatch[:message]}")
 
-            joinmatch = /^(?<name>[^\<\>]+?) joined the game/.match(infomatch[:message])
-            leftmatch = /^(?<name>[^\<\>]+?) left the game/.match(infomatch[:message])
+            joinmatch = /(?<name>[^\<\>]+?) joined the game/.match(infomatch[:message])
+            leftmatch = /(?<name>[^\<\>]+?) left the game/.match(infomatch[:message])
 
             if joinmatch
               players[joinmatch[:name]] = true if joinmatch[:name]
@@ -115,7 +115,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
             chan.send_message msg_to_discord if can_display
           end
 
-          if %r{^\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\]: Done}.match(line)
+          if %r{\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\] \[minecraft/DedicatedServer\]: Done}.match(line)
             p line
             chan.send_message 'Server up.'
             logchan.send_message '[SERV] Start complete'
