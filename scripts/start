@@ -8,11 +8,11 @@ if [ ! -f forge-1.18.2-40.2.26-installer.jar ] ; then
     rm -rf .
     curl -o 'forge-1.18.2-40.2.26-installer.jar' 'https://maven.minecraftforge.net/net/minecraftforge/forge/1.18.2-40.2.26/forge-1.18.2-40.2.26-installer.jar'
     java -jar forge-1.18.2-40.2.26-installer.jar --installServer
-fi
-if [ ! -d mods ] ; then
-    curl -o 'release.zip' 'https://github.com/brandongohwh/Custom1.18/archive/refs/tags/Release.zip'
+    echo "Downloading mods"
+    curl -L 'https://github.com/brandongohwh/Custom1.18/archive/refs/tags/Release.zip' > 'release.zip'
     unzip 'release.zip'
-    mv release/Custom1.18-Release/* .
+    rm -rf config defaultconfigs mods resourcepacks
+    mv Custom1.18-Release/* . && rm Custom1.18-Release
 fi
 if [[ -n "$MOTD" ]]; then
     sed -i "/motd\s*=/ c motd=$MOTD" /data/server.properties
@@ -23,7 +23,6 @@ fi
 if [[ -n "$OPS" ]]; then
     echo $OPS | awk -v RS=, '{print}' >> ops.txt
 fi
-
 
 if [ ! -f /data/eula.txt ]
 then
