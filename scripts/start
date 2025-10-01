@@ -4,11 +4,16 @@
 # -----------------------------------------------------------------------------
 
 cd /data/;
-if ! [[ -f serverinstall_95_6434 ]]; then
-    rm -f serverinstall_* forge-*.jar
-    curl -o 'serverinstall_95_6434' 'https://api.feed-the-beast.com/v1/modpacks/public/server/installer?platform=ftb&packId=95&versionId=6434&os=linux'
-    chmod +x serverinstall_95_6434
-    ./serverinstall_95_6434 --dir /data --auto --force
+if [ ! -f serverinstall_129_100131 ] ; then
+    rm -rf .
+    curl -JLO "https://api.feed-the-beast.com/v1/modpacks/public/modpack/129/100131/server/linux"
+    chmod +x serverinstall_129_100131 
+    ./serverinstall_129_100131 --dir /data --auto --force
+    echo "Downloading mods"
+    curl -L 'https://www.dropbox.com/scl/fi/96qa3cq5xltzy9f9u6oyp/ftbextramods.zip?rlkey=0kxf06dq2e342ck1pkludalk4&st=nnxag6wi&dl=0' > 'release.zip'
+    unzip -o 'release.zip'
+    rm release.zip
+    mv *.jar ./mods
 fi
 if [[ -n "$MOTD" ]]; then
     sed -i "/motd\s*=/ c motd=$MOTD" /data/server.properties
@@ -19,7 +24,6 @@ fi
 if [[ -n "$OPS" ]]; then
     echo $OPS | awk -v RS=, '{print}' >> ops.txt
 fi
-
 
 if [ ! -f /data/eula.txt ]
 then
