@@ -6,7 +6,7 @@
 # -----------------------------------------------------------------------------
 
 # Base image is the latest LTS version of Ubuntu
-FROM   ubuntu:20.04
+FROM   ubuntu:22.04
 
 # Make sure we don't get notifications we can't answer during building.
 ENV DEBIAN_FRONTEND noninteractive
