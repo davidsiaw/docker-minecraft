@@ -3,31 +3,55 @@
 # docker-minecraft /start script
 # -----------------------------------------------------------------------------
 
+
+smolver=130
+bigver=100180
+
+installer="serverinstall_${smolver}_${bigver}"
+
 cd /data/;
-if [ ! -f serverinstall_129_100131 ] ; then
-    rm -rf .
-    curl -JLO "https://api.feed-the-beast.com/v1/modpacks/public/modpack/129/100131/server/linux"
-    chmod +x serverinstall_129_100131 
-    ./serverinstall_129_100131 --dir /data --auto --force
-    echo "Downloading mods"
-    curl -L 'https://www.dropbox.com/scl/fi/96qa3cq5xltzy9f9u6oyp/ftbextramods.zip?rlkey=0kxf06dq2e342ck1pkludalk4&st=nnxag6wi&dl=0' > 'release.zip'
-    unzip -o 'release.zip'
-    rm release.zip
-    mv *.jar ./mods
+
+if [ ! -f "$installer" ] ; then
+    #rm -rf ./*
+    echo "Downloading installer"
+    curl -JLO "https://api.feed-the-beast.com/v1/modpacks/public/modpack/${smolver}/${bigver}/server/linux"
+    ls
+    cat server.properties
+    echo "Running installer"
+    chmod +x $installer
+    ./"$installer" --dir /data --auto --force
+    #echo "Downloading mods"
+    #curl -L 'https://www.dropbox.com/scl/fi/96qa3cq5xltzy9f9u6oyp/ftbextramods.zip?rlkey=0kxf06dq2e342ck1pkludalk4&st=nnxag6wi&dl=0' > 'release.zip'
+    #unzip -o 'release.zip'
+    #rm release.zip
+    #mv *.jar ./mods
+
+    if [ ! -f /data/eula.txt ]
+    then
+        echo "eula=true" > /data/eula.txt
+    fi
+
+    # Do a first run which will close on its own
+    echo "--FIRST START--"
+    sh run.sh
 fi
+
+# Prep the server properties
 if [[ -n "$MOTD" ]]; then
     sed -i "/motd\s*=/ c motd=$MOTD" /data/server.properties
 fi
+
 if [[ -n "$LEVEL" ]]; then
     sed -i "/level-name\s*=/ c level-name=$LEVEL" /data/server.properties
 fi
+
 if [[ -n "$OPS" ]]; then
     echo $OPS | awk -v RS=, '{print}' >> ops.txt
 fi
 
-if [ ! -f /data/eula.txt ]
-then
-    echo "eula=true" > /data/eula.txt
-fi
+sed -i "/max-tick-time\s*=/ c max-tick-time=-1" /data/server.properties
 
+cat server.properties
+
+# start the server
 sh run.sh

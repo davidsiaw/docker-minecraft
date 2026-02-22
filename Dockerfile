@@ -49,6 +49,8 @@ ADD    ./scripts/server.properties /data/server.properties
 ENV MOTD="Ruby's Direwolf Minecraft Server"
 ENV LEVEL=default
 ENV JVM_OPTS="-Xms4096m -Xmx6144m"
+ENV OVERRIDE_SERVER_PROPERTIES=false
+ENV SKIP_SERVER_PROPERTIES=true
 
 # /start runs it.
 CMD    ["bundle", "exec", "ruby", "main.rb"]

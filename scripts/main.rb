@@ -107,7 +107,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
             #   msg_to_discord.gsub!('fell into a patch of fire', 'は火に燃やされた')
             #   msg_to_discord.gsub!('fell into a patch of cacti', 'はサボテンにやられた')
 
-            #   msg_to_discord.gsub!('tried to swim in lava', 'は')
+            #   msg_to_discord.gsub!('tried to swim in lava', 'は溶岩に泳ごうとしてた')
             #   msg_to_discord.gsub!('blew up', 'が爆発された')
             #   msg_to_discord.gsub!('drowned', 'が溺れた')
             #   msg_to_discord.gsub!('withered away', 'は干からびた')
@@ -118,7 +118,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
 
           if %r{\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\] \[minecraft/DedicatedServer\]: Done}.match(line)
             p line
-            chan.send_message 'Loading loot tables...'
+            # chan.send_message 'Loading loot tables...'
           elsif %r{\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/WARN\] \[ModernFix/\]: Dedicated server took.+}.match(line)
             p line
             chan.send_message 'Server up.'
@@ -161,6 +161,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
 end
 
 def start_server
+  puts "Start Server"
   cmd = '/start'
 
   bot = Discordrb::Bot.new(
@@ -181,6 +182,8 @@ def start_server
 
   logchan = nil
   chan = nil
+
+  firststart = false
 
   loop do
     # looped code goes here:
@@ -220,9 +223,10 @@ def start_server
           mention_r = /\<@(?<member_id>[0-9]+)\>/
 
           message = message.gsub(emote_r) { |x| ":#{emote_r.match(x)[:emote_name]}:" }
+          
           message = message.gsub(mention_r) do |x|
             user = chan.server.member(mention_r.match(x)[:member_id].to_i)
-            "@#{user.username}" if user
+            "<@ #{user.username}>" if user
           end
 
           stdin.puts "say <#{event.author.username}> #{message}"
@@ -236,3 +240,5 @@ def start_server
     chan.send_message 'Server has shut down'
   end
 end
+
+start_server
