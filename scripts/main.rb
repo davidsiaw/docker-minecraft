@@ -38,7 +38,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
           # remove colors
           line.gsub!(/\r?\e\[(K|\d+(;\d+)*m)/, '')
 
-          infomatch = %r{\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\] \[[^\]]+\]: (?<message>.+)}.match(line)
+          infomatch = %r{\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\] \[(?<mod>[^\]]+)\]: (?<message>.+)}.match(line)
 
           p line
 
@@ -66,6 +66,7 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
 
             can_display = false if infomatch[:message].start_with? '[Server]'
             can_display = false if infomatch[:message].start_with? '['
+            can_display = false unless infomatch[:mod].start_with? 'minecraft/'
 
             msg_to_discord = infomatch[:message]
 
@@ -117,7 +118,11 @@ def start_minecraft(bot, chan, logchan, stdin, stdout, _pid)
 
           if %r{\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/INFO\] \[minecraft/DedicatedServer\]: Done}.match(line)
             p line
+            chan.send_message 'Loading loot tables...'
+          elsif %r{\[[0-9]+:[0-9]+:[0-9]+\] \[Server thread/WARN\] \[ModernFix/\]: Dedicated server took.+}.match(line)
+            p line
             chan.send_message 'Server up.'
+            chan.send_message "#{line.split(':').last}"
             logchan.send_message '[SERV] Start complete'
           end
         rescue StandardError => e
@@ -179,7 +184,6 @@ def start_server
 
   loop do
     # looped code goes here:
-
     begin
       logchan = bot.find_channel('mcbotlog')[0]
       if logchan.nil?
@@ -232,5 +236,3 @@ def start_server
     chan.send_message 'Server has shut down'
   end
 end
-
-start_server
